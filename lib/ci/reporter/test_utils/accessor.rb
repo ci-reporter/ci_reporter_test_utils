@@ -10,6 +10,12 @@ module CI::Reporter::TestUtils
       end
     end
 
+    Error = Struct.new(:xml) do
+      def type
+        xml.attributes['type']
+      end
+    end
+
     Testcase = Struct.new(:xml) do
       def name
         xml.attributes['name']
@@ -17,6 +23,10 @@ module CI::Reporter::TestUtils
 
       def failures
         xml.elements.to_a('failure').map {|f| Failure.new(f) }
+      end
+
+      def errors
+        xml.elements.to_a("error").map {|e| Error.new(e) }
       end
     end
 
@@ -29,7 +39,7 @@ module CI::Reporter::TestUtils
     end
 
     def errors
-      root.elements.to_a("/testsuite/testcase/error")
+      root.elements.to_a("/testsuite/testcase/error").map {|e| Error.new(e) }
     end
 
     def testcases
