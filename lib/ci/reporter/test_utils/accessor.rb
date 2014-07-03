@@ -4,12 +4,28 @@ module CI::Reporter::TestUtils
   class Accessor
     attr_reader :root
 
+    Failure = Struct.new(:xml) do
+      def type
+        xml.attributes['type']
+      end
+    end
+
+    Testcase = Struct.new(:xml) do
+      def name
+        xml.attributes['name']
+      end
+
+      def failures
+        xml.elements.to_a('failure').map {|f| Failure.new(f) }
+      end
+    end
+
     def initialize(xml)
       @root = xml.root
     end
 
     def failures
-      root.elements.to_a("/testsuite/testcase/failure")
+      root.elements.to_a("/testsuite/testcase/failure").map {|f| Failure.new(f) }
     end
 
     def errors
@@ -17,7 +33,11 @@ module CI::Reporter::TestUtils
     end
 
     def testcases
-      root.elements.to_a("/testsuite/testcase")
+      root.elements.to_a("/testsuite/testcase").map {|tc| Testcase.new(tc) }
+    end
+
+    def testcase(name)
+      testcases.select {|tc| tc.name == name }.first
     end
 
     [:failures, :errors, :skipped, :assertions, :tests].each do |attr|
