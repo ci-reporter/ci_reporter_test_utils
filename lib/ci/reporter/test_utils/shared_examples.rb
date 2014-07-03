@@ -30,5 +30,12 @@ module CI::Reporter::TestUtils
         it { should eql result.testcases.count }
       end
     end
+
+    shared_examples "assertions are not tracked" do
+      describe "the assertion count" do
+        subject { result.assertions_count }
+        it { should eql 0 }
+      end
+    end
   end
 end
