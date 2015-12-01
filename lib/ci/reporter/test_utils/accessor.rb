@@ -28,6 +28,10 @@ module CI::Reporter::TestUtils
       def errors
         xml.elements.to_a("error").map {|e| Error.new(e) }
       end
+
+      def skipped?
+        xml.elements.to_a("skipped").count == 1
+      end
     end
 
     def initialize(xml)
